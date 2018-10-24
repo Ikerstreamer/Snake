@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <script type="text/javascript">
+        var grid = [];
+        var size = 20;
+        var snake;
+        var move;
+        var play;
+        var highScore = [0,0,0,0,0];
+        var loop;
+        function init(load) {
+            if(load && JSON.parse(atob(localStorage.getItem("SnakeScores"))) != undefined)highScore = JSON.parse(atob(localStorage.getItem("SnakeScores")));
+            grid = [];
+            var table = document.getElementById("game");
+            for(var i = 0;i<size;i++){
+            grid.push([]);
+            var row = table.insertRow(i);
+                for(var j = 0;j<size;j++){
+                    grid[i].push(0);
+                    var cell = row.insertCell(j);
+                    cell.style.width = (100/size) + "%";
+                    cell.style.paddingTop = (500/size) + "px"; 
+                }
+            }
+            var num = Math.floor(Math.random()*size);
+            snake = [size*2+num, size+num, num];
+            move = -size;
+            randomApple();
+            for(var i=0;i<snake.length;i++)grid[Math.floor(snake[i]/size)][snake[i]%size] = i+2;
+            window.gameClock = setInterval(loop, 2000/size);
+            document.getElementById("gg").className = "hidden";
+            play = true;
+        }
+
+        function loop(){
+            document.getElementById("score").innerHTML="Score: " + (snake.length-3);
+            var table = document.getElementById("game");
+         for(var i = 0; i<grid.length;i++)for(var j = 0; j<grid[i].length;j++){
+             var cell = table.rows[i].cells[j];
+             switch(grid[i][j]){
+                 case 0:
+                     cell.style.backgroundColor = "white";
+                     break;
+                 case 1:
+                     cell.style.backgroundColor = "red";
+                     break;
+                 default:
+                     cell.style.backgroundColor = "green";
+                     snake[grid[i][j]-2]=i*size+j;
+                     grid[i][j] = 0;
+                     break;
+             }
+            }
+         if ((move == -size && Math.floor(snake[0] / size) == size-1) || (move == size && Math.floor(snake[0] / size) == 0) || (move == -1 && snake[0] % size == size-1) || (move == 1 && snake[0] % size ==  0) || snake.includes(snake[0]-move))setTimeout(gameOver,(2000/size)-5);
+         else {
+             if (grid[Math.floor((snake[0] - move) / size)][(snake[0] - move) % size] == 1) {
+                 snake.push(0);
+                 
+                 randomApple();
+             }
+             for (var i = snake.length - 1; i > 0; i--) snake[i] = snake[i - 1];
+             snake[0] -= move;  
+         }   
+            for(var i=0;i<snake.length;i++)grid[Math.floor(snake[i]/size)][snake[i]%size] = i+2;
+        }
+        function gameOver(){
+            for(var i = 0; i<highScore.length;i++){ 
+                if(snake.length-3 > highScore[i]){
+                for(var j = highScore.length-1;j>i;j--) highScore[j] = highScore[j-1];
+                highScore[i] = snake.length-3;
+                break; 
+            }
+            }
+            localStorage.setItem("SnakeScores", btoa(JSON.stringify(highScore)));
+            for(var i = 0; i<highScore.length;i++) document.getElementById("hs").rows[i].cells[0].innerHTML = (i+1) + ". " + highScore[i];
+                play = false;
+                clearInterval(gameClock);
+            for(var i = size-1;i>=0;i--)document.getElementById("game").deleteRow(i);
+                document.getElementById("gg").className = "";
+        }
+
+        function randomApple(){
+            var rand;
+            do rand = Math.floor(Math.random() * Math.pow(size,2));
+                while (snake.includes(rand) || rand == snake[0] - move);
+            grid[Math.floor(rand / size)][rand % size] = 1;
+        }
+
+        window.addEventListener("keydown", function (event) {
+            var key = event.keyCode || event.which;
+            if (play) {
+                if (key == 39 || key == 68) move = -1;
+                if (key == 37 || key == 65) move = 1;
+                if (key == 38 || key == 87) move = size;
+                if (key == 40 || key == 83) move = -size;
+            } else init();
+}, false)
+    </script>
+    <style>
+        #game td {
+            padding-top: 50px;
+            width: 10%;
+        }
+        .hidden {display:none !important;}
+    </style>
+</head>
+<body onload="init(true)">
+    <h1 style="text-align:center;" id="score">Score: 0</h1>
+    <table id="game" align="center" style="width:500px; border:solid;     border-collapse: collapse;
+" border="1">
+    </table>
+    <div id="gg" class="hidden">
+        <h1 style="text-align:center;">HighScores</h1>
+        <table id="hs" align="center" style="width:250px; font-size:50px;">
+        <tr><td></td></tr>
+        <tr><td></td></tr>
+        <tr><td></td></tr>
+        <tr><td></td></tr>
+        <tr><td></td></tr>
+    </table>
+        <h1 style="text-align:center;">Game Over</h1>
+        <h2 style="text-align:center;">Press Any Key to Play Again</h2>
+    </di
