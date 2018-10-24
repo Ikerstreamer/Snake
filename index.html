@@ -4,14 +4,14 @@
 <head>
     <script type="text/javascript">
         var grid = [];
-        var size = 20;
+        var size = 10;
         var snake;
         var move;
         var play;
         var highScore = [0,0,0,0,0];
         var loop;
         function init(load) {
-            if(load && JSON.parse(atob(localStorage.getItem("SnakeScores"))) != undefined)highScore = JSON.parse(atob(localStorage.getItem("SnakeScores")));
+            if(load && localStorage.getItem("SnakeScores") != undefined)highScore = JSON.parse(atob(localStorage.getItem("SnakeScores")));
             grid = [];
             var table = document.getElementById("game");
             for(var i = 0;i<size;i++){
